@@ -1,4 +1,9 @@
-import { commandHandlers } from './src/commands.mjs';
+import {
+  commandHandlers,
+  deferredResponse,
+  getBlockedChannelResponse,
+  resolveBalanceMessage,
+} from './src/commands.mjs';
 import { verifyDiscordRequest } from './src/discord-interactions.mjs';
 import { fetchBalance } from './src/utils/balance-api.mjs';
 
@@ -13,8 +18,26 @@ const json = (payload, status = 200) =>
 
 const badRequest = (message, status = 400) => json({ error: message }, status);
 
+const editOriginalInteractionResponse = async (interaction, content) => {
+  const response = await fetch(
+    `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`,
+    {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify({ content }),
+    },
+  );
+
+  if (!response.ok) {
+    const payload = await response.text().catch(() => '');
+    throw new Error(`Failed to edit interaction response: ${response.status} ${payload}`);
+  }
+};
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     if (request.method !== 'POST') {
       return badRequest('Only POST is supported.', 405);
     }
@@ -40,6 +63,33 @@ export default {
     }
 
     const commandName = interaction?.data?.name;
+
+    if (commandName === 'balance') {
+      const blocked = getBlockedChannelResponse(interaction, env);
+      if (blocked) {
+        return json(blocked);
+      }
+
+      ctx.waitUntil(
+        (async () => {
+          try {
+            const content = await resolveBalanceMessage(interaction, env, { fetchBalance });
+            await editOriginalInteractionResponse(interaction, content);
+          } catch (error) {
+            console.error('Deferred balance command failed', error);
+            await editOriginalInteractionResponse(
+              interaction,
+              `Hata: ${error.message || 'Komut calistirilamadi.'}`,
+            ).catch((followupError) => {
+              console.error('Failed to send deferred error response', followupError);
+            });
+          }
+        })(),
+      );
+
+      return json(deferredResponse());
+    }
+
     const handler = commandHandlers[commandName];
 
     if (!handler) {
