@@ -1,0 +1,21 @@
+{
+  "name": "supremacybank",
+  "version": "1.0.0",
+  "description": "",
+  "main": "readExcel.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bot:balance": "node bot/balance-bot.cjs",
+    "bot:slash": "node bot/slash-bot/index.cjs",
+    "bot:slash:deploy": "node bot/slash-bot/deploy-commands.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.3",
+    "xlsx": "^0.18.5"
+  }
+}

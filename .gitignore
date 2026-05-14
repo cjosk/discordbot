@@ -1,0 +1,9 @@
+node_modules/
+app/node_modules/
+bot/node_modules/
+bot/.env
+bot/slash-bot/.env
+app/.env
+app/dist/
+app/.vercel/
+*.log
