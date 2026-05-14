@@ -1,8 +1,10 @@
 import {
   commandHandlers,
+  createErrorMessageData,
+  createUnknownCommandResponse,
   deferredResponse,
   getBlockedChannelResponse,
-  resolveBalanceMessage,
+  resolveBalanceMessageData,
 } from './src/commands.mjs';
 import { verifyDiscordRequest } from './src/discord-interactions.mjs';
 import { fetchBalance } from './src/utils/balance-api.mjs';
@@ -18,7 +20,7 @@ const json = (payload, status = 200) =>
 
 const badRequest = (message, status = 400) => json({ error: message }, status);
 
-const editOriginalInteractionResponse = async (interaction, content) => {
+const editOriginalInteractionResponse = async (interaction, data) => {
   const response = await fetch(
     `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`,
     {
@@ -26,7 +28,7 @@ const editOriginalInteractionResponse = async (interaction, content) => {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
       },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(data),
     },
   );
 
@@ -73,13 +75,16 @@ export default {
       ctx.waitUntil(
         (async () => {
           try {
-            const content = await resolveBalanceMessage(interaction, env, { fetchBalance });
-            await editOriginalInteractionResponse(interaction, content);
+            const data = await resolveBalanceMessageData(interaction, env, { fetchBalance });
+            await editOriginalInteractionResponse(interaction, data);
           } catch (error) {
             console.error('Deferred balance command failed', error);
             await editOriginalInteractionResponse(
               interaction,
-              `Hata: ${error.message || 'Komut calistirilamadi.'}`,
+              createErrorMessageData(
+                interaction,
+                error.message || 'The command could not be completed.',
+              ),
             ).catch((followupError) => {
               console.error('Failed to send deferred error response', followupError);
             });
@@ -93,13 +98,7 @@ export default {
     const handler = commandHandlers[commandName];
 
     if (!handler) {
-      return json({
-        type: 4,
-        data: {
-          content: `Bilinmeyen komut: ${commandName || 'unknown'}`,
-          flags: 64,
-        },
-      });
+      return json(createUnknownCommandResponse(interaction, commandName));
     }
 
     try {
@@ -109,10 +108,10 @@ export default {
       console.error(`Command failed: ${commandName}`, error);
       return json({
         type: 4,
-        data: {
-          content: `Hata: ${error.message || 'Komut calistirilamadi.'}`,
-          flags: 64,
-        },
+        data: createErrorMessageData(
+          interaction,
+          error.message || 'The command could not be completed.',
+        ),
       });
     }
   },
