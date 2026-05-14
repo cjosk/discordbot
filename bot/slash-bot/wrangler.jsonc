@@ -1,7 +1,7 @@
 {
-  "name": "supremacy-slash-bot",
+  "name": "discordbot1",
   "main": "worker.mjs",
-  "compatibility_date": "2026-05-15",
+  "compatibility_date": "2026-05-14",
   "vars": {
     "BALANCE_API_URL": "https://teamsupremacyhq.vercel.app/api/discord-balance"
   }
