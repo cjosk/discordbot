@@ -6,8 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "bot:balance": "node bot/balance-bot.cjs",
-    "bot:slash": "node bot/slash-bot/index.cjs",
-    "bot:slash:deploy": "node bot/slash-bot/deploy-commands.cjs"
+    "bot:slash": "npx wrangler dev --config bot/slash-bot/wrangler.jsonc",
+    "bot:slash:deploy": "npx wrangler deploy --config bot/slash-bot/wrangler.jsonc",
+    "bot:slash:register": "node bot/slash-bot/deploy-commands.mjs"
   },
   "keywords": [],
   "author": "",

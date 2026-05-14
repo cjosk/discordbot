@@ -1,4 +1,5 @@
-const { config } = require('../config.cjs');
+const readBalanceApiUrl = (env) =>
+  String(env?.BALANCE_API_URL || 'https://teamsupremacyhq.vercel.app/api/discord-balance').trim();
 
 const fetchJson = async (url) => {
   const response = await fetch(url);
@@ -11,12 +12,8 @@ const fetchJson = async (url) => {
   return payload;
 };
 
-const fetchBalance = async (discordId) => {
-  const url = new URL(config.balanceApiUrl);
+export const fetchBalance = async (discordId, env) => {
+  const url = new URL(readBalanceApiUrl(env));
   url.searchParams.set('discordId', discordId);
   return fetchJson(url.toString());
-};
-
-module.exports = {
-  fetchBalance,
 };

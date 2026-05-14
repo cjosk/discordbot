@@ -1,10 +1,35 @@
-Kurulum:
+Cloudflare Worker slash botu.
+
+Bu klasor artik surekli acik `discord.js` gateway botu degil. Discord Interactions endpoint'i olarak calisir ve Cloudflare Workers ile uyumludur.
+
+Gerekli degiskenler:
 
 1. `bot/slash-bot/.env.example` dosyasini `bot/slash-bot/.env` olarak kopyala.
-2. `DISCORD_BOT_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_GUILD_ID` degerlerini doldur.
-3. Root klasorde `npm install` calistir.
-4. Slash commandlari guild'e yazmak icin `npm run bot:slash:deploy` calistir.
-5. Botu baslatmak icin `npm run bot:slash` calistir.
+2. Su degerleri doldur:
+   - `DISCORD_BOT_TOKEN`
+   - `DISCORD_APPLICATION_ID`
+   - `DISCORD_PUBLIC_KEY`
+   - `DISCORD_GUILD_ID` (test icin opsiyonel ama onerilir)
+   - `BALANCE_API_URL`
+3. `npm install`
+
+Komutlar:
+
+- `npm run bot:slash`
+  Cloudflare Worker'i local `wrangler dev` ile calistirir.
+- `npm run bot:slash:deploy`
+  Worker'i Cloudflare'a deploy eder.
+- `npm run bot:slash:register`
+  Slash commandlari Discord'a yazar.
+
+Cloudflare kurulum:
+
+1. `bot/slash-bot/wrangler.jsonc` icindeki Worker adini ihtiyaca gore duzenle.
+2. Dashboard veya Wrangler ile Worker env/secret degerlerini gir:
+   - `DISCORD_PUBLIC_KEY`
+   - `BALANCE_API_URL`
+3. Deploy sonrasi Worker URL'sini Discord Developer Portal icindeki `Interactions Endpoint URL` alanina yapistir.
+4. `npm run bot:slash:register` ile commandlari kaydet.
 
 Hazir komutlar:
 
@@ -12,7 +37,8 @@ Hazir komutlar:
 - `/help`
 - `/balance`
 
-Not:
+Notlar:
 
-- Simdilik command deploy islemi `DISCORD_GUILD_ID` uzerinden guild scoped yapiliyor. Test icin en hizlisi bu.
+- `DISCORD_BOT_TOKEN` sadece command register islemi icin gerekir.
+- `DISCORD_GUILD_ID` varsa komutlar guild scoped kaydedilir. Yoksa global kaydedilir.
 - `/balance` mevcut `BALANCE_API_URL` endpointini kullanir.
