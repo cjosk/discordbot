@@ -1,10 +1,6 @@
 node_modules/
-app/node_modules/
 bot/node_modules/
-bot/.env
 bot/slash-bot/.env
 bot/slash-bot/.dev.vars
-app/.env
-app/dist/
-app/.vercel/
+.wrangler/
 *.log

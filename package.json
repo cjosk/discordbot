@@ -1,11 +1,10 @@
 {
-  "name": "supremacybank",
+  "name": "discordbot",
   "version": "1.0.0",
-  "description": "",
-  "main": "readExcel.js",
+  "description": "Cloudflare Worker based Discord slash bot.",
+  "main": "bot/slash-bot/worker.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "bot:balance": "node bot/balance-bot.cjs",
     "bot:slash": "npx wrangler dev --config bot/slash-bot/wrangler.jsonc",
     "bot:slash:deploy": "npx wrangler deploy --config bot/slash-bot/wrangler.jsonc",
     "bot:slash:register": "node bot/slash-bot/deploy-commands.mjs"
@@ -15,8 +14,6 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3",
-    "xlsx": "^0.18.5"
+    "dotenv": "^17.2.3"
   }
 }
