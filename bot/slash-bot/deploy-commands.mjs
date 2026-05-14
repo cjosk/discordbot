@@ -14,7 +14,7 @@ const readEnv = (key) => String(process.env[key] || '').trim();
 
 const config = {
   token: readEnv('DISCORD_BOT_TOKEN'),
-  applicationId: readEnv('DISCORD_APPLICATION_ID'),
+  applicationId: readEnv('DISCORD_APPLICATION_ID') || readEnv('DISCORD_CLIENT_ID'),
   guildId: readEnv('DISCORD_GUILD_ID'),
 };
 

@@ -1,5 +1,7 @@
 export const EPHEMERAL_FLAG = 64;
 
+const readAllowedChannelId = (env) => String(env?.DISCORD_ALLOWED_CHANNEL_ID || '').trim();
+
 export const discordCommands = [
   {
     name: 'ping',
@@ -23,10 +25,27 @@ const jsonResponse = (content) => ({
   },
 });
 
-export const commandHandlers = {
-  ping: async () => jsonResponse('Pong.'),
+const requireAllowedChannel = (interaction, env) => {
+  const allowedChannelId = readAllowedChannelId(env);
+  if (!allowedChannelId) return null;
 
-  help: async () => {
+  const currentChannelId = String(interaction?.channel_id || '').trim();
+  if (currentChannelId === allowedChannelId) return null;
+
+  return jsonResponse('Bu komut sadece belirli kanalda kullanilabilir.');
+};
+
+export const commandHandlers = {
+  ping: async (interaction, env) => {
+    const blocked = requireAllowedChannel(interaction, env);
+    if (blocked) return blocked;
+    return jsonResponse('Pong.');
+  },
+
+  help: async (interaction, env) => {
+    const blocked = requireAllowedChannel(interaction, env);
+    if (blocked) return blocked;
+
     const commandNames = discordCommands
       .map((command) => `/${command.name}`)
       .sort((left, right) => left.localeCompare(right));
@@ -35,6 +54,9 @@ export const commandHandlers = {
   },
 
   balance: async (interaction, env, { fetchBalance }) => {
+    const blocked = requireAllowedChannel(interaction, env);
+    if (blocked) return blocked;
+
     const discordId = interaction?.member?.user?.id || interaction?.user?.id;
 
     if (!discordId) {

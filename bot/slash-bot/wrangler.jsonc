@@ -3,6 +3,7 @@
   "main": "worker.mjs",
   "compatibility_date": "2026-05-14",
   "vars": {
+    "DISCORD_ALLOWED_CHANNEL_ID": "1488349953905655951",
     "BALANCE_API_URL": "https://teamsupremacyhq.vercel.app/api/discord-balance"
   }
 }

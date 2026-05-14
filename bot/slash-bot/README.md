@@ -7,9 +7,10 @@ Gerekli degiskenler:
 1. `bot/slash-bot/.env.example` dosyasini `bot/slash-bot/.env` olarak kopyala.
 2. Su degerleri doldur:
    - `DISCORD_BOT_TOKEN`
-   - `DISCORD_APPLICATION_ID`
+   - `DISCORD_APPLICATION_ID` veya `DISCORD_CLIENT_ID`
    - `DISCORD_PUBLIC_KEY`
    - `DISCORD_GUILD_ID` (test icin opsiyonel ama onerilir)
+   - `DISCORD_ALLOWED_CHANNEL_ID` (opsiyonel, komutlari tek kanala kisitlar)
    - `BALANCE_API_URL`
 3. `npm install`
 
@@ -41,4 +42,5 @@ Notlar:
 
 - `DISCORD_BOT_TOKEN` sadece command register islemi icin gerekir.
 - `DISCORD_GUILD_ID` varsa komutlar guild scoped kaydedilir. Yoksa global kaydedilir.
+- `DISCORD_ALLOWED_CHANNEL_ID` varsa bot komutlari sadece o kanalda cevap verir.
 - `/balance` mevcut `BALANCE_API_URL` endpointini kullanir.
