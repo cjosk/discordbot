@@ -36,6 +36,12 @@ const buildDiscordMessageUrl = (channelId, messageId, env) => {
 const shouldParseAnnouncement = (message) =>
   message?.type === 0 && /MASS\s*TIME\s*:/i.test(String(message?.content || ''));
 
+const toUtcDayKey = (value) => {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toISOString().slice(0, 10);
+};
+
 const formatUtcDateTime = (value) => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return 'Unknown UTC';
@@ -79,8 +85,11 @@ const syncChannelAnnouncements = async (env) => {
   }
 
   const messages = await fetchChannelMessages(channelId, env, { limit: 25 });
+  const todayUtcKey = toUtcDayKey(new Date().toISOString());
   const announcements = Array.isArray(messages)
-    ? [...messages].filter(shouldParseAnnouncement).sort(
+    ? [...messages].filter((message) =>
+      shouldParseAnnouncement(message) && toUtcDayKey(message?.timestamp) === todayUtcKey
+    ).sort(
       (left, right) => new Date(left.timestamp || 0) - new Date(right.timestamp || 0),
     )
     : [];
