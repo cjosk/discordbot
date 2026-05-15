@@ -45,6 +45,8 @@ const formatUtcDateTime = (value) => {
 const buildReminderMessage = (job) => {
   const event = job?.event || {};
   const task = job?.task || {};
+  const assignment = job?.assignment || {};
+  const mention = assignment?.discord_user_id ? `<@${assignment.discord_user_id}>` : '';
   const title = String(event.content_title || 'Loot Logger Gorevi').trim();
   const startAt = formatUtcDateTime(event.event_start_at);
   const endAt = formatUtcDateTime(event.event_end_at);
@@ -53,19 +55,21 @@ const buildReminderMessage = (job) => {
 
   if (job?.ping_type === 'start_reminder') {
     return [
+      mention,
       `${title} basladi.`,
       `Baslangic saati: ${startAt}`,
       'Loot logger ve chest logger uygulamalarini simdi acik tut.',
       actionLine,
-    ].join('\n');
+    ].filter(Boolean).join('\n');
   }
 
   return [
+    mention,
     `${title} bitti.`,
     `Bitis saati: ${endAt}`,
     'Loot log ve chest log dosyalarini simdi yukle.',
     actionLine,
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 };
 
 const syncChannelAnnouncements = async (env) => {
