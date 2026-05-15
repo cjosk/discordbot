@@ -1,2 +1,6 @@
 DISCORD_PUBLIC_KEY=
 BALANCE_API_URL=https://teamsupremacyhq.vercel.app/api/discord-balance
+DISCORD_BOT_TOKEN=
+LOOT_LOGVIEWER_API_URL=https://teamsupremacyhq.vercel.app/api/loot-logviewer
+LOOT_LOGVIEWER_BOT_SECRET=
+LOOT_LOGGER_CHANNEL_ID=1322824303208566876

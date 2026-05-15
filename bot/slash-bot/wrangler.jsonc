@@ -1,9 +1,14 @@
-{
+﻿{
   "name": "discordbot1",
   "main": "worker.mjs",
-  "compatibility_date": "2026-05-14",
+  "compatibility_date": "2026-05-15",
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
   "vars": {
     "DISCORD_ALLOWED_CHANNEL_ID": "1488349953905655951",
-    "BALANCE_API_URL": "https://teamsupremacyhq.vercel.app/api/discord-balance"
+    "BALANCE_API_URL": "https://teamsupremacyhq.vercel.app/api/discord-balance",
+    "LOOT_LOGVIEWER_API_URL": "https://teamsupremacyhq.vercel.app/api/loot-logviewer",
+    "LOOT_LOGGER_CHANNEL_ID": "1322824303208566876"
   }
 }

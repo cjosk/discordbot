@@ -7,11 +7,13 @@ Gerekli degiskenler:
 1. `bot/slash-bot/.env.example` dosyasini `bot/slash-bot/.env` olarak kopyala.
 2. Su degerleri doldur:
    - `DISCORD_BOT_TOKEN`
-   - `DISCORD_APPLICATION_ID` veya `DISCORD_CLIENT_ID`
+   - `DISCORD_APPLICATION_ID`
    - `DISCORD_PUBLIC_KEY`
    - `DISCORD_GUILD_ID` (test icin opsiyonel ama onerilir)
-   - `DISCORD_ALLOWED_CHANNEL_ID` (opsiyonel, komutlari tek kanala kisitlar)
    - `BALANCE_API_URL`
+   - `LOOT_LOGVIEWER_API_URL`
+   - `LOOT_LOGVIEWER_BOT_SECRET`
+   - `LOOT_LOGGER_CHANNEL_ID`
 3. `npm install`
 
 Komutlar:
@@ -28,9 +30,20 @@ Cloudflare kurulum:
 1. `bot/slash-bot/wrangler.jsonc` icindeki Worker adini ihtiyaca gore duzenle.
 2. Dashboard veya Wrangler ile Worker env/secret degerlerini gir:
    - `DISCORD_PUBLIC_KEY`
+   - `DISCORD_BOT_TOKEN`
    - `BALANCE_API_URL`
+   - `LOOT_LOGVIEWER_API_URL`
+   - `LOOT_LOGVIEWER_BOT_SECRET`
+   - `LOOT_LOGGER_CHANNEL_ID`
 3. Deploy sonrasi Worker URL'sini Discord Developer Portal icindeki `Interactions Endpoint URL` alanina yapistir.
 4. `npm run bot:slash:register` ile commandlari kaydet.
+
+Loot Logviewer automation:
+
+- Worker her dakika CTA channel mesajlarini poll eder.
+- `MASS TIME:` iceren mesajlari loot logviewer API'ye upsert eder.
+- Atanan loot logger staff'e `T-30`, `start`, ve eksik submission durumlarinda DM yollar.
+- DM icindeki `upload link` ile logger staff admin olmadan dosya yukleyebilir.
 
 Hazir komutlar:
 
@@ -42,5 +55,4 @@ Notlar:
 
 - `DISCORD_BOT_TOKEN` sadece command register islemi icin gerekir.
 - `DISCORD_GUILD_ID` varsa komutlar guild scoped kaydedilir. Yoksa global kaydedilir.
-- `DISCORD_ALLOWED_CHANNEL_ID` varsa bot komutlari sadece o kanalda cevap verir.
 - `/balance` mevcut `BALANCE_API_URL` endpointini kullanir.
