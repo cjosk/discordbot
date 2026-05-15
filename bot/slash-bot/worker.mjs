@@ -1,11 +1,4 @@
-﻿import {
-  commandHandlers,
-  createErrorMessageData,
-  createUnknownCommandResponse,
-  deferredResponse,
-  getBlockedChannelResponse,
-  resolveBalanceMessageData,
-} from './src/commands.mjs';
+import { commandHandlers } from './src/commands.mjs';
 import { verifyDiscordRequest } from './src/discord-interactions.mjs';
 import { fetchBalance } from './src/utils/balance-api.mjs';
 import { fetchChannelMessages, sendDirectMessage } from './src/utils/discord-api.mjs';
@@ -52,34 +45,25 @@ const formatUtcDateTime = (value) => {
 const buildReminderMessage = (job) => {
   const event = job?.event || {};
   const task = job?.task || {};
-  const title = String(event.content_title || 'Loot Logger Task').trim();
+  const title = String(event.content_title || 'Loot Logger Gorevi').trim();
   const startAt = formatUtcDateTime(event.event_start_at);
-  const dueAt = formatUtcDateTime(event.submission_due_at);
+  const endAt = formatUtcDateTime(event.event_end_at);
   const uploadUrl = task.upload_link_url || job?.payload?.upload_link || '';
-  const actionLine = uploadUrl ? `Upload link: ${uploadUrl}` : 'Upload link: unavailable';
-
-  if (job?.ping_type === 'pre_reminder') {
-    return [
-      `Loot logger reminder for ${title}`,
-      `Mass start: ${startAt}`,
-      'Please open your loot logger before the CTA starts.',
-      actionLine,
-    ].join('\n');
-  }
+  const actionLine = uploadUrl ? `Yukleme linki: ${uploadUrl}` : 'Yukleme linki su an hazir degil.';
 
   if (job?.ping_type === 'start_reminder') {
     return [
-      `CTA started for ${title}`,
-      `Start time: ${startAt}`,
-      'Keep the loot logger and chest logger running during the full event.',
+      `${title} basladi.`,
+      `Baslangic saati: ${startAt}`,
+      'Loot logger ve chest logger uygulamalarini simdi acik tut.',
       actionLine,
     ].join('\n');
   }
 
   return [
-    `Submission reminder for ${title}`,
-    `Submission due: ${dueAt}`,
-    'Your loot log and chest log are still missing or incomplete.',
+    `${title} bitti.`,
+    `Bitis saati: ${endAt}`,
+    'Loot log ve chest log dosyalarini simdi yukle.',
     actionLine,
   ].join('\n');
 };
@@ -141,9 +125,6 @@ const processDueReminderJobs = async (env) => {
       await completeReminderJob({
         jobId: job.id,
         status: 'sent',
-        wasLate:
-          job.ping_type === 'pre_reminder'
-          && new Date(job.scheduled_at || 0).getTime() < Date.now() - 60000,
       }, env);
 
       results.push({ id: job.id, status: 'sent' });
@@ -174,26 +155,8 @@ const runAutomation = async (env) => {
   };
 };
 
-const editOriginalInteractionResponse = async (interaction, data) => {
-  const response = await fetch(
-    `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json; charset=utf-8',
-      },
-      body: JSON.stringify(data),
-    },
-  );
-
-  if (!response.ok) {
-    const payload = await response.text().catch(() => '');
-    throw new Error(`Failed to edit interaction response: ${response.status} ${payload}`);
-  }
-};
-
 export default {
-  async fetch(request, env, ctx) {
+  async fetch(request, env) {
     if (request.method !== 'POST') {
       return badRequest('Only POST is supported.', 405);
     }
@@ -219,40 +182,16 @@ export default {
     }
 
     const commandName = interaction?.data?.name;
-
-    if (commandName === 'balance') {
-      const blocked = getBlockedChannelResponse(interaction, env);
-      if (blocked) {
-        return json(blocked);
-      }
-
-      ctx.waitUntil(
-        (async () => {
-          try {
-            const data = await resolveBalanceMessageData(interaction, env, { fetchBalance });
-            await editOriginalInteractionResponse(interaction, data);
-          } catch (error) {
-            console.error('Deferred balance command failed', error);
-            await editOriginalInteractionResponse(
-              interaction,
-              createErrorMessageData(
-                interaction,
-                error.message || 'The command could not be completed.',
-              ),
-            ).catch((followupError) => {
-              console.error('Failed to send deferred error response', followupError);
-            });
-          }
-        })(),
-      );
-
-      return json(deferredResponse());
-    }
-
     const handler = commandHandlers[commandName];
 
     if (!handler) {
-      return json(createUnknownCommandResponse(interaction, commandName));
+      return json({
+        type: 4,
+        data: {
+          content: `Bilinmeyen komut: ${commandName || 'unknown'}`,
+          flags: 64,
+        },
+      });
     }
 
     try {
@@ -262,10 +201,10 @@ export default {
       console.error(`Command failed: ${commandName}`, error);
       return json({
         type: 4,
-        data: createErrorMessageData(
-          interaction,
-          error.message || 'The command could not be completed.',
-        ),
+        data: {
+          content: `Hata: ${error.message || 'Komut calistirilamadi.'}`,
+          flags: 64,
+        },
       });
     }
   },
