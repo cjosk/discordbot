@@ -1,16 +1,14 @@
-# Discord Slash Bot
+Kurulum:
 
-Cloudflare Worker tabanli Discord slash botu.
+1. `bot/.env.example` dosyasini `bot/.env` olarak kopyala.
+2. `DISCORD_BOT_TOKEN` gir.
+3. Root klasorde `npm install` calistir.
+4. `npm run bot:balance` calistir.
 
-Komutlar:
+Notlar:
 
-- `npm run bot:slash`
-- `npm run bot:slash:deploy`
-- `npm run bot:slash:register`
-
-Ana dosyalar:
-
-- `bot/slash-bot/worker.mjs`
-- `bot/slash-bot/wrangler.jsonc`
-- `bot/slash-bot/src/commands.mjs`
-- `bot/slash-bot/deploy-commands.mjs`
+- Bot surekli acik kalmali. Bilgisayari kapatirsan veya process kapanirsa `!balance` calismaz.
+- Discord Developer Portal'da `MESSAGE CONTENT INTENT` acik olmali.
+- Botun mesaji okuyabildigi kanalda `View Channel`, `Send Messages`, `Read Message History` izinleri olmali.
+- Endpoint:
+  `GET /api/discord-balance?discordId=DISCORD_USER_ID`
