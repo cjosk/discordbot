@@ -182,7 +182,7 @@ const sendChannelMessage = async (channelId, content, env) => {
 
 const runSiphoneTrackerCron = async (env) => {
   if (!env.VITE_SUPABASE_URL || !env.VITE_SUPABASE_ANON_KEY) return;
-  const channelId = env.ALLOWED_BALANCE_CHANNEL_ID || '1488349953905655951'; // fallback
+  const channelId = env.SIPHONE_CHANNEL_ID || '1488360336745693326';
   
   try {
     const response = await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/negative_balances?id=eq.1&select=data`, {
