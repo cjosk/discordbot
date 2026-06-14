@@ -168,6 +168,65 @@ const runAutomation = async (env) => {
   };
 };
 
+const sendChannelMessage = async (channelId, content, env) => {
+  const response = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ content }),
+  });
+  return response.json();
+};
+
+const runSiphoneTrackerCron = async (env) => {
+  if (!env.VITE_SUPABASE_URL || !env.VITE_SUPABASE_ANON_KEY) return;
+  const channelId = env.ALLOWED_BALANCE_CHANNEL_ID || '1488349953905655951'; // fallback
+  
+  try {
+    const response = await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/negative_balances?id=eq.1&select=data`, {
+      headers: {
+        'apikey': env.VITE_SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${env.VITE_SUPABASE_ANON_KEY}`
+      }
+    });
+    
+    const result = await response.json();
+    if (!result || result.length === 0) return;
+    
+    const data = result[0].data || {};
+    const transactions = data.transactions || [];
+    
+    const playersMap = {};
+    transactions.forEach(row => {
+      if (row.status === 'pending' || row.status === 'rejected') return;
+      if (!playersMap[row.player]) playersMap[row.player] = { name: row.player, deposits: 0, withdrawals: 0, net: 0 };
+      if (row.reason === 'Deposit') playersMap[row.player].deposits += row.amount;
+      else if (row.reason === 'Withdrawal') playersMap[row.player].withdrawals += row.amount;
+    });
+
+    const negatives = [];
+    Object.values(playersMap).forEach(p => {
+      p.net = p.deposits + p.withdrawals;
+      if (p.net < 0) negatives.push(p);
+    });
+    negatives.sort((a, b) => a.net - b.net);
+
+    if (negatives.length === 0) return;
+
+    let messageContent = ':peepoTurk: Aşağıda paylaşılan listede Siphoned Energy bakiyesi ekside olan oyuncular bulunmaktadır. @everyone\n\n';
+    for (const p of negatives) {
+      messageContent += `**${p.name}**: ${p.net} Siphone (Deposit: ${p.deposits} | Harcama: ${p.withdrawals})\n`;
+    }
+    
+    messageContent += '\nLütfen eksik olan tutarları bankaya deposit edin.';
+    await sendChannelMessage(channelId, messageContent, env);
+  } catch (e) {
+    console.error('Siphone cron failed:', e);
+  }
+};
+
 export default {
   async fetch(request, env) {
     if (request.method !== 'POST') {
@@ -223,6 +282,10 @@ export default {
   },
 
   async scheduled(_controller, env, ctx) {
-    ctx.waitUntil(runAutomation(env));
+    if (_controller?.cron === '0 23 * * 0') {
+      ctx.waitUntil(runSiphoneTrackerCron(env));
+    } else {
+      ctx.waitUntil(runAutomation(env));
+    }
   },
 };
