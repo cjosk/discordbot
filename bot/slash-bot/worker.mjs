@@ -282,10 +282,16 @@ export default {
   },
 
   async scheduled(_controller, env, ctx) {
-    if (_controller?.cron === '0 23 * * 0') {
+    ctx.waitUntil(runAutomation(env));
+
+    // Pazar günü saat 23:00 (UTC+3 = 20:00 UTC) kontrolü
+    const now = new Date();
+    const dayUTC = now.getUTCDay(); // 0 = Pazar
+    const hourUTC = now.getUTCHours();
+    const minuteUTC = now.getUTCMinutes();
+
+    if (dayUTC === 0 && hourUTC === 20 && minuteUTC === 0) {
       ctx.waitUntil(runSiphoneTrackerCron(env));
-    } else {
-      ctx.waitUntil(runAutomation(env));
     }
   },
 };

@@ -3,7 +3,7 @@
   "main": "worker.mjs",
   "compatibility_date": "2026-05-15",
   "triggers": {
-    "crons": ["* * * * *", "0 23 * * 0"]
+    "crons": ["* * * * *"]
   },
   "vars": {
     "BALANCE_API_URL": "https://teamsupremacyhq.vercel.app/api/discord-balance",
